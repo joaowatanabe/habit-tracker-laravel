@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
@@ -12,4 +13,24 @@ class LoginController extends Controller
     {
         return view(view: 'login');
     }
-}
+
+    //POST /login
+
+    public function authenticate(Request $request)
+    {
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|min:6',
+        ]);
+
+        if(Auth::attempt($credentials)) {
+            $request->session()->regenerate();
+
+            return redirect()->intended( default: '/');
+        } else {
+            return back()->withErrors([
+                'email' => 'Credenciais inválidas',
+            ])->onlyInput('email');
+        }
+    }
+};
